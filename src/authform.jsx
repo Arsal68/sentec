@@ -7,7 +7,6 @@ import { useGSAP } from "@gsap/react";
 export default function AuthForm() {
   const navigate = useNavigate();
 
-  // --- STATE VARIABLES ---
   const [isLogin, setIsLogin] = useState(true);
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
@@ -18,15 +17,12 @@ export default function AuthForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // --- GSAP REFS ---
+// gsap refrnc
   const containerRef = useRef(null);
   const formRef = useRef(null);
 
-  // --- CHECK EXISTING SESSION ---
   useEffect(() => {
     const checkSession = async () => {
-      // Fake admin bypass check (from your original code)
       if (localStorage.getItem("nep_admin_bypass")) {
         navigate("/admin-dashboard", { replace: true });
         return;
@@ -45,7 +41,7 @@ export default function AuthForm() {
             await supabase.auth.signOut();
             setError("Your society account is pending admin approval.");
           } else {
-            // Redirect based on role
+           
             if (profile.role === "admin") navigate("/admin-dashboard");
             else if (profile.role === "society") navigate("/society-dashboard");
             else navigate("/student-dashboard");
@@ -56,7 +52,6 @@ export default function AuthForm() {
     checkSession();
   }, [navigate]);
 
-  // --- GSAP ANIMATIONS ---
   useGSAP(() => {
     const tl = gsap.timeline();
     tl.fromTo(
@@ -80,7 +75,6 @@ export default function AuthForm() {
     );
   }, { dependencies: [isLogin], scope: formRef });
 
-  // --- AUTHENTICATION LOGIC ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -88,15 +82,13 @@ export default function AuthForm() {
 
     try {
       if (isLogin) {
-        // --- LOGIN LOGIC ---
         const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: loginInput, // Assuming they use email to login
+          email: loginInput, 
           password: password,
         });
 
         if (authError) throw authError;
 
-        // Fetch user profile to check role
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role, status")
@@ -105,19 +97,16 @@ export default function AuthForm() {
 
         if (profileError) throw profileError;
 
-        // Check if society is pending
         if (profile.role === "society" && profile.status === "pending") {
           await supabase.auth.signOut();
           throw new Error("Your society account is still pending admin approval.");
         }
 
-        // Redirect based on role
         if (profile.role === "admin") navigate("/admin-dashboard");
         else if (profile.role === "society") navigate("/society-dashboard");
         else navigate("/student-dashboard");
 
       } else {
-        // --- SIGNUP LOGIC ---
         if (password !== confirmPassword) {
           throw new Error("Passwords do not match!");
         }
@@ -129,7 +118,6 @@ export default function AuthForm() {
 
         if (signUpError) throw signUpError;
 
-        // Insert into profiles table
         if (data?.user) {
           const { error: profileError } = await supabase.from("profiles").insert([
             {
@@ -145,9 +133,8 @@ export default function AuthForm() {
 
           if (role === "society") {
             setError("Society account created! Please wait for admin approval.");
-            setIsLogin(true); // Switch to login view
-          } else {
-            navigate("/student-dashboard"); // Students get immediate access
+            setIsLogin(true); 
+            navigate("/student-dashboard"); 
           }
         }
       }
@@ -158,7 +145,6 @@ export default function AuthForm() {
     }
   };
 
-  // --- RENDER UI ---
   return (
     <div 
       ref={containerRef}
@@ -178,7 +164,6 @@ export default function AuthForm() {
           </p>
         </div>
 
-        {/* Error Message Display */}
         {error && (
           <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm text-center font-medium backdrop-blur-sm">
             {error}
@@ -283,7 +268,7 @@ export default function AuthForm() {
             <button 
               onClick={() => {
                 setIsLogin(!isLogin);
-                setError(""); // Clear errors when switching modes
+                setError("");
               }} 
               className="ml-2 text-[#FFD700] font-semibold hover:underline decoration-2 underline-offset-4 focus:outline-none"
             >
