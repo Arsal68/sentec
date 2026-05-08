@@ -1,216 +1,151 @@
-import React, { useState, useEffect } from "react";
-import { supabase } from "./supabase"; 
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 export default function AuthForm() {
-  const navigate = useNavigate();
-
   const [isLogin, setIsLogin] = useState(true);
-  const [fullname, setFullname] = useState("");
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [role, setRole] = useState("student");
-  const [loginInput, setLoginInput] = useState(""); 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const containerRef = useRef(null);
+  const formRef = useRef(null);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      if (localStorage.getItem("nep_admin_bypass")) {
-        navigate("/admin-dashboard", { replace: true });
-        return;
-      }
+  useGSAP(() => {
+    const tl = gsap.timeline();
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role, status")
-          .eq("id", session.user.id)
-          .single();
-        
-        if (profile) {
-          if (profile.role === "society" && profile.status === "pending") {
-            await supabase.auth.signOut();
-            setError("Your account is pending admin approval. Please wait for an administrator to verify your society.");
-            return;
-          }
-          redirectUser(profile.role);
-        }
-      }
-    };
-    checkSession();
-  }, [navigate]);
+    tl.fromTo(
+      ".glass-card",
+      { y: 50, opacity: 0, scale: 0.95 },
+      { y: 0, opacity: 1, scale: 1, duration: 1, ease: "power4.out" }
+    );
 
-  const redirectUser = (role) => {
-    if (role === "society") navigate("/society-dashboard", { replace: true });
-    else if (role === "admin") navigate("/admin-dashboard", { replace: true });
-    else navigate("/student-dashboard", { replace: true });
-  };
+    tl.fromTo(
+      ".auth-header",
+      { y: -20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: "back.out(1.7)" },
+      "-=0.6"
+    );
+  }, { scope: containerRef });
 
-  const handleSignup = async () => {
-  setError("");
-  if (password !== confirmPassword) { setError("Passwords do not match."); return; }
-  setLoading(true);
-
-
-  const { data: authData, error: signUpError } = await supabase.auth.signUp({ email, password });
-  if (signUpError) { setError(signUpError.message); setLoading(false); return; }
-
-  const user = authData.user;
-  if (user) {
-    let finalSocietyId = null;
-
-    // If the user is a society create the entry in the 'societies' table
-    if (role === 'society') {
-      const { data: newSoc, error: socError } = await supabase
-        .from("societies")
-        .insert([{ name: fullname }]) // Uses the full name as the initial society name
-        .select()
-        .single();
-
-      if (socError) {
-        setError("Error creating society entry: " + socError.message);
-        setLoading(false);
-        return;
-      }
-      finalSocietyId = newSoc.id;
-    }
-
-    //  Create the Profile with the linked society_id
-    const { error: profileError } = await supabase.from("profiles").insert([{
-      id: user.id,
-      fullname,
-      email,
-      username,
-      role,
-      status: role === 'society' ? 'pending' : 'approved',
-      society_id: finalSocietyId // This links the two tables
-    }]);
-
-    if (profileError) {
-      setError(profileError.message);
-    } else {
-      alert("Signup successful! " + (role === 'society' ? "Wait for admin approval." : "Login now."));
-      setIsLogin(true);
-    }
-  }
-  setLoading(false);
-};
-  const handleLogin = async (e) => {
-    if (e) e.preventDefault();
-    
-    if (loginInput === "admin" && password === "admin") {
-      localStorage.setItem("nep_admin_bypass", "true"); 
-      navigate("/admin-dashboard", { replace: true });
-      return;
-    }
-
-    localStorage.removeItem("nep_admin_bypass");
-    setError("");
-    setLoading(true);
-
-    try {
-      let loginEmail = loginInput;
-      if (!loginInput.includes("@")) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("email")
-          .eq("username", loginInput)
-          .single();
-
-        if (data) loginEmail = data.email;
-        else throw new Error("Username not found.");
-      }
-
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: password,
-      });
-
-      if (authError) throw authError;
-
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role, status")
-        .eq("id", authData.user.id)
-        .single();
-
-      if (profileError) throw new Error("Failed to fetch user profile.");
-
-      if (profile.role === "society" && profile.status === "pending") {
-        await supabase.auth.signOut();
-        throw new Error("Your society account has not been approved yet. An admin must verify your account before you can log in.");
-      }
-
-      redirectUser(profile.role);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useGSAP(() => {
+    gsap.fromTo(
+      ".gsap-input",
+      { x: isLogin ? -30 : 30, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: "power3.out" }
+    );
+  }, { dependencies: [isLogin], scope: formRef });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isLogin) handleLogin(e);
-    else handleSignup();
+    console.log(isLogin ? "Logging in..." : "Signing up...");
   };
 
-  const inputClasses = "px-4 py-3 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition";
-
   return (
-    <div className="max-w-md mx-auto mt-12 p-8 bg-white rounded-xl shadow-lg font-sans">
-      <h2 className="text-center text-3xl font-extrabold text-gray-900 mb-8">
-        {isLogin ? "Welcome Back" : "Create Account"}
-      </h2>
+    <div 
+      ref={containerRef}
+      className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-[#2a0845] via-[#4A0E4E] to-[#600000] overflow-hidden relative"
+    >
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#FFD700] rounded-full mix-blend-overlay filter blur-[128px] opacity-20 animate-pulse"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#9333EA] rounded-full mix-blend-overlay filter blur-[128px] opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col">
-        {!isLogin && (
-          <>
-            <input type="text" placeholder="Full Name" value={fullname} onChange={(e) => setFullname(e.target.value)} required className={inputClasses} />
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClasses} />
-            <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required className={inputClasses} />
-          </>
-        )}
+      <div className="glass-card relative z-10 w-full max-w-md bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-3xl p-8 overflow-hidden">
+        
+        <div className="auth-header text-center mb-8">
+          <h2 className="text-4xl font-extrabold text-white tracking-tight drop-shadow-md">
+            {isLogin ? "Holaa" : "Konnect"}
+          </h2>
+          <p className="text-gray-300 mt-2 font-light">
+            {isLogin ? "Continue from where you left" : "Create account."}
+          </p>``
+        </div>
 
-        {isLogin && (
-          <input type="text" placeholder="Email or Username" value={loginInput} onChange={(e) => setLoginInput(e.target.value)} required className={inputClasses} />
-        )}
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
+          
+          {!isLogin && (
+            <div className="gsap-input">
+              <input 
+                type="text" 
+                placeholder="Full Name" 
+                required 
+                className="w-full px-5 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all duration-300 backdrop-blur-sm" 
+              />
+            </div>
+          )}
 
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className={inputClasses} />
+          <div className="gsap-input">
+            <input 
+              type={isLogin ? "text" : "email"} 
+              placeholder={isLogin ? "Email or Username" : "Email Address"} 
+              required 
+              className="w-full px-5 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all duration-300 backdrop-blur-sm" 
+            />
+          </div>
 
-        {!isLogin && (
-          <>
-            <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className={inputClasses} />
-            <select value={role} onChange={(e) => setRole(e.target.value)} className={`${inputClasses} cursor-pointer`}>
-              <option value="student">Student</option>
-              <option value="society">Society</option>
-            </select>
-          </>
-        )}
+          {!isLogin && (
+            <div className="gsap-input">
+              <input 
+                type="text" 
+                placeholder="Username" 
+                required 
+                className="w-full px-5 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all duration-300 backdrop-blur-sm" 
+              />
+            </div>
+          )}
 
-        <button type="submit" disabled={loading} className={`mt-4 py-3 rounded-lg font-semibold text-white shadow-md transition ${loading ? "bg-blue-300" : "bg-blue-600 hover:bg-blue-700"}`}>
-          {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
-        </button>
-      </form>
+          <div className="gsap-input">
+            <input 
+              type="password" 
+              placeholder="Password" 
+              required 
+              className="w-full px-5 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all duration-300 backdrop-blur-sm" 
+            />
+          </div>
 
-      {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-center text-sm font-medium leading-relaxed">
-            {error}
+          {!isLogin && (
+            <>
+              <div className="gsap-input">
+                <input 
+                  type="password" 
+                  placeholder="Confirm Password" 
+                  required 
+                  className="w-full px-5 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all duration-300 backdrop-blur-sm" 
+                />
+              </div>
+              <div className="gsap-input">
+                <select className="w-full px-5 py-3 rounded-xl bg-black/20 border border-white/10 text-white focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all duration-300 backdrop-blur-sm appearance-none cursor-pointer">
+                  <option value="student" className="text-black">Student</option>
+                  <option value="society" className="text-black">Society</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {isLogin && (
+             <div className="gsap-input text-right">
+               <a href="#" className="text-sm text-gray-300 hover:text-[#FFD700] transition-colors">
+                 Forgot password?
+               </a>
+             </div>
+          )}
+
+          <button 
+            type="submit" 
+            className="gsap-input mt-4 w-full py-3.5 rounded-xl bg-[#FFD700] text-[#2A0845] font-bold text-lg shadow-[0_0_15px_rgba(255,215,0,0.4)] hover:shadow-[0_0_25px_rgba(255,215,0,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 uppercase tracking-wider"
+          >
+            {isLogin ? "Log In" : "Sign Up"}
+          </button>
+        </form>
+
+        <div className="mt-8 text-center gsap-input border-t border-white/10 pt-6">
+          <p className="text-gray-300">
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
+            <button 
+              onClick={() => setIsLogin(!isLogin)} 
+              className="ml-2 text-[#FFD700] font-semibold hover:underline decoration-2 underline-offset-4 focus:outline-none"
+            >
+              {isLogin ? "Sign Up" : "Log In"}
+            </button>
           </p>
         </div>
-      )}
 
-      <p className="mt-6 text-center text-gray-600 text-sm">
-        {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-        <button onClick={() => { setError(""); setIsLogin(!isLogin); }} className="text-red-600 underline cursor-pointer font-semibold">
-          {isLogin ? "Sign Up" : "Login"}
-        </button>
-      </p>
+      </div>
     </div>
   );
 }

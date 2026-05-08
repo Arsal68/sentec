@@ -34,13 +34,13 @@ function LandingPage() {
   const [isVisible, setIsVisible] = useState(true);
 
   useGSAP(() => {
-    // Start the text off-screen on the left
+    
 gsap.set("#page2 p", { xPercent: -80 });
 
 const tl = gsap.timeline();
 
 tl.to("#page2 p", {
-  xPercent: 120, // Move to off-screen right
+  xPercent: 120, 
   ease: "none",
   scrollTrigger: {
     trigger: "#page2",
@@ -97,7 +97,7 @@ tl.to("#page2 p", {
       {isVisible && (
         <div
           id="page"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#F3C77C]"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#f1cd00]"
         >
           <img
             src={IMAGES[index % IMAGES.length]}
