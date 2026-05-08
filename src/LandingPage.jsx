@@ -5,17 +5,26 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
 
 // images here
-const lps = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/lps.png"
-const sen = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/sen.png"
-const nsa = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/nsa.png"
-const nas = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/nas.png"
-const mosaic = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/mosaic.png"
-const nds = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/nds.png"
-const gsc = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/gsc.png"
-const logo = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/logo.png";
+const lps =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/lps.png";
+const sen =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/sen.png";
+const nsa =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/nsa.png";
+const nas =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/nas.png";
+const mosaic =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/mosaic.png";
+const nds =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/nds.png";
+const gsc =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/gsc.png";
+const logo =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/logo.png";
+const heroVid =
+  "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/vid/vid02.mp4";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
-
 
 const IMAGES = [lps, sen, nsa, nas, mosaic, nds, gsc];
 
@@ -25,20 +34,22 @@ function LandingPage() {
   const [isVisible, setIsVisible] = useState(true);
 
   useGSAP(() => {
-    const tl = gsap.timeline();
+    // Start the text off-screen on the left
+gsap.set("#page2 p", { xPercent: -80 });
 
-    tl.to("#page2 p", {
-      xPercent: 120,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "#page2",
-        scroller: "body",
-        start: "top 0%",
-        end: "+=2000",
-        scrub: 1,
-        pin: true,
-      },
-    });
+const tl = gsap.timeline();
+
+tl.to("#page2 p", {
+  xPercent: 120, // Move to off-screen right
+  ease: "none",
+  scrollTrigger: {
+    trigger: "#page2",
+    start: "top 0%",
+    end: "+=2000",
+    scrub: 1,
+    pin: true,
+  },
+});
   }, []);
 
   useEffect(() => {
@@ -69,7 +80,7 @@ function LandingPage() {
 
       tl.from("#head", { y: -20, opacity: 0, duration: 0.5 });
       tl.from(
-        "#links button", 
+        "#links button",
         {
           y: -20,
           opacity: 0,
@@ -97,40 +108,53 @@ function LandingPage() {
       )}
 
       <div className="min-h-screen bg-[#F9FAFB]">
-        <div
-          id="heroSec"
-          className="relative z-10 bg-[#F9FAFB]"
-        >
+        <div id="heroSec" className="relative z-10 bg-[#F9FAFB]">
+          <div className="relative h-[100vh] overflow-hidden">
+            <video
+              src={heroVid}
+              autoPlay
+              muted
+              loop
+              className="absolute inset-0 w-full h-full object-cover"
+            />
 
-          <nav className="bg-[#FFFFFF] text-[#101828] flex justify-between items-center px-10 py-3 h-18">
-            <div id="head" className="w-48">
-              <img src={logo} alt="NEDConnect Logo" className="w-full h-full object-contain" />
-            </div>
-            <div id="links" className="flex gap-8 text cursor-pointer">
-              <button 
-                onClick={() => navigate("/login")} 
-                className="hover:bg-blue-500 hover:text-white text-[#101828] p-2 rounded-2xl bg-transparent border-2 border-blue-500 font-bold transition-colors"
-              >
-                SignIn/SignUp
-              </button>
-            </div>
-          </nav>
+            <nav className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center px-10   text-white">
+              <div id="head" className="w-48">
+                <img
+                  src={logo}
+                  alt="NEDConnect Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div id="links" className="flex gap-8">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="rounded-2xl border-2 border-white bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white hover:text-slate-900"
+                >
+                  SignIn/SignUp
+                </button>
+              </div>
+            </nav>
 
-          <div className="text-[3vw] font-mclaren text-[#101828] h-[calc(100vh-72px)] flex flex-col font-extrabold justify-center items-center">
-            <p className="">Connect. Create.</p>
-            <p className="">Celebrate.</p>
+            <div className="relative z-10 flex flex-col items-center justify-center h-full text-[3vw] font-extrabold text-white">
+              <p>Connect. Create.</p>
+              <p>Celebrate.</p>
+            </div>
           </div>
         </div>
 
         <div
           id="page2"
-          className="bg-[#111F35] h-screen flex justify-center items-center overflow-hidden"
+          className="bg-[#2a0845] h-screen flex justify-center items-center overflow-hidden"
         >
-          <p className="font-asset text-[35vw] text-white whitespace-nowrap mr-0 leading-none">
+          <p
+            dir="rtl"
+            className="font-asset text-[35vw] text-[#ffd700] whitespace-nowrap leading-none"
+          >
             جڑوگے تو جانو گے
           </p>
-        </div>        
-      </div>        
+        </div>
+      </div>
     </div>
   );
 }
