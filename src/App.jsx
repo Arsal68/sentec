@@ -4,7 +4,7 @@ import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
 
-// IMPORT IMAGES HERE
+// images here
 const lps = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/lps.png"
 const sen = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/sen.png"
 const nsa = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/media/logos/nsa.png"
@@ -16,7 +16,7 @@ const logo = "https://ykitnocbijsdxxydnjwh.supabase.co/storage/v1/object/public/
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-// --- 2. USE VARIABLES IN ARRAY ---
+
 const IMAGES = [lps, sen, nsa, nas, mosaic, nds, gsc];
 
 function LandingPage() {
@@ -69,7 +69,7 @@ function LandingPage() {
 
       tl.from("#head", { y: -20, opacity: 0, duration: 0.5 });
       tl.from(
-        "#links button", // target button specifically
+        "#links button", 
         {
           y: -20,
           opacity: 0,
@@ -104,8 +104,7 @@ function LandingPage() {
 
           <nav className="bg-[#FFFFFF] text-[#101828] flex justify-between items-center px-10 py-3 h-18">
             <div id="head" className="w-48">
-               {/* 3. USE IMPORTED LOGO VARIABLE HERE */}
-               <img src={logo} alt="NEDConnect Logo" className="w-full h-full object-contain" />
+              <img src={logo} alt="NEDConnect Logo" className="w-full h-full object-contain" />
             </div>
             <div id="links" className="flex gap-8 text cursor-pointer">
               <button 
@@ -127,7 +126,7 @@ function LandingPage() {
           id="page2"
           className="bg-[#111F35] h-screen flex justify-center items-center overflow-hidden"
         >
-          <p className="font-asset text-[35vw] text-[#fff] whitespace-nowrap mr-0 leading-none">
+          <p className="font-asset text-[35vw] text-white whitespace-nowrap mr-0 leading-none">
             جڑوگے تو جانو گے
           </p>
         </div>        
