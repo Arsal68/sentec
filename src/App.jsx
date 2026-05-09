@@ -8,7 +8,7 @@ import SocietyDashboard from "./societyDashboard";
 import CreateEvent from "./createEvents";
 import ProtectedRoute from "./Routes"; 
 
-function App() {
+function App() {        
   return (    
       <Routes>
         <Route path="/" element={<LandingPage />} />

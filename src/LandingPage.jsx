@@ -115,7 +115,7 @@ tl.to("#page2 p", {
               autoPlay
               muted
               loop
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover scale-125 sm:scale-110 md:scale-100"
             />
 
             <nav className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center px-10   text-white">
