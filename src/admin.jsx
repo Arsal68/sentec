@@ -123,8 +123,7 @@ export default function Admin() {
 
       <nav className="admin-nav relative z-20 bg-white/5 backdrop-blur-md border-b border-white/10 px-8 py-5 flex justify-between items-center shadow-lg">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-md text-white">Central Admin</h1>
-          <p className="text-xs text-[#FFD700] font-black uppercase tracking-widest mt-1 shadow-sm">Command Override Active</p>
+          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-md text-white">Admin Panel</h1>
         </div>
         <button 
           onClick={handleLogout} 
