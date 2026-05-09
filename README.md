@@ -17,8 +17,8 @@ This project is developed and maintained by the **Array yar** team:
 |--------|------|
 | Arsal | Developer |
 | Haris | Developer |
-| Usman | Developer |
-| Shaji | Developer |
+| Usman | Designer |
+| Shaji | Designer |
 
 ---
 
