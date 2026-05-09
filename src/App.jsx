@@ -2,10 +2,10 @@ import React from "react";
 import { Routes, Route } from "react-router-dom"; 
 import LandingPage from "./LandingPage";
 import AuthForm from "./authform";
-import StudentDashboard from "./studentDashboard"; 
+import StudentDashboard from "./studentdashboard"; 
 import Admin from "./admin";
-import SocietyDashboard from "./societyDashboard";
-import CreateEvent from "./createEvents";
+import SocietyDashboard from "./societydashboard";
+import CreateEvent from "./createevents";
 import ProtectedRoute from "./Routes"; 
 
 function App() {        
