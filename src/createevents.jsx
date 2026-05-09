@@ -13,7 +13,6 @@ export default function CreateEvent() {
   const [eventDate, setEventDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [posterUrl, setPosterUrl] = useState(""); 
 
   const [societyId, setSocietyId] = useState(null);
   const [societyName, setSocietyName] = useState(""); 
@@ -87,7 +86,6 @@ export default function CreateEvent() {
             event_date: eventDate,
             start_time: startTime,
             end_time: endTime,
-            poster_url: posterUrl, 
             society_id: societyId,
             status: "pending"
           },
@@ -163,14 +161,7 @@ export default function CreateEvent() {
             />
           </div>
 
-          <div className="gsap-item">
-            <label className="block text-xs font-bold uppercase tracking-widest text-gray-300 mb-2 ml-1">Poster Image URL (Optional)</label>
-            <input 
-              className="w-full bg-black/30 border border-white/10 p-4 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all" 
-              placeholder="https://example.com/image.png" 
-              value={posterUrl} onChange={(e) => setPosterUrl(e.target.value)} 
-            />
-          </div>
+         
 
           <div className="gsap-item grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>

@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import LandingPage from "./LandingPage";
 import AuthForm from "./authform";
 import StudentDashboard from "./studentDashboard"; 
-// import AdminDashboard from "./AdminDashboard";
+import Admin from "./admin";
 import SocietyDashboard from "./societyDashboard";
 import CreateEvent from "./createEvents";
 import ProtectedRoute from "./Routes"; 
@@ -15,7 +15,7 @@ function App() {
         <Route path="/login" element={<AuthForm />} />
         
         <Route element={<ProtectedRoute allowedRole="admin" />}>
-          {/* <Route path="/admin-dashboard" element={<AdminDashboard />} /> */}
+          <Route path="/admin" element={<Admin />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRole="society" />}>
