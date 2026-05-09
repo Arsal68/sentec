@@ -146,7 +146,7 @@ export default function CreateEvent() {
             <label className="block text-xs font-bold uppercase tracking-widest text-gray-300 mb-2 ml-1">Event Title</label>
             <input 
               className="w-full bg-black/30 border border-white/10 p-4 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] transition-all" 
-              placeholder="e.g. Annual Tech Symposium" 
+              placeholder="e.g. Olympiad 2026" 
               value={title} onChange={(e) => setTitle(e.target.value)} required 
             />
           </div>

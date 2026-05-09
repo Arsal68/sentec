@@ -1,5 +1,5 @@
 // Initialize Lenis
 const lenis = new Lenis({
-    duration: 2.0,
+    duration: 1.5,
   autoRaf: true,
 });

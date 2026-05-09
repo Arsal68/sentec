@@ -118,24 +118,23 @@ tl.to("#page2 p", {
               className="absolute inset-0 w-full h-full object-cover max-[800px]:scale-250 md:scale-100"
             />
 
-            <nav className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center px-10   text-white">
-              <div id="head" className="w-48 max-[600px]:w-20">
-                <img
-                  src={logo}
-                  alt="NEDConnect Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div id="links" className="flex gap-8">
-                <button
-                  onClick={() => navigate("/login")}
-                  className="rounded-2xl border-2 border-white bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white hover:text-slate-900"
-                >
-                  SignIn/SignUp
-                </button>
-              </div>
-            </nav>
-
+           <nav className="absolute top-0 left-0 w-full z-20 flex justify-between items-center px-4 pt-1.5 md:px-10 text-white">
+          <div id="head" className="w-24 md:w-40">
+            <img
+              src={logo}
+              alt="NEDConnect Logo"
+              className="w-full h-auto object-contain object-left-top"
+            />
+          </div>
+          <div id="links" className="flex gap-8">
+            <button
+              onClick={() => navigate("/login")}
+              className="rounded-xl border-2 border-white bg-white/10 px-3 py-1.5 text-sm md:text-base md:px-4 md:py-2 md:rounded-2xl text-white transition-colors hover:bg-white hover:text-slate-900"
+            >
+              SignIn/SignUp
+            </button>
+          </div>
+        </nav>
             <div className="relative z-10 flex flex-col items-center justify-center h-full text-[3vw] font-extrabold text-white">
               <p>Connect. Create.</p>
               <p>Celebrate.</p>

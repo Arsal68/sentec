@@ -8,6 +8,7 @@ import { Lock } from "lucide-react";
 export default function AuthForm() {
   const navigate = useNavigate();
 
+  // --- States ---
   const [isLogin, setIsLogin] = useState(true);
   const [isAdminMode, setIsAdminMode] = useState(false); 
   
@@ -21,10 +22,12 @@ export default function AuthForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // --- GSAP Refs ---
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const cardRef = useRef(null);
 
+  // --- Session Check ---
   useEffect(() => {
     const checkSession = async () => {
       if (localStorage.getItem("nep_admin_bypass") === "true") {
@@ -43,7 +46,7 @@ export default function AuthForm() {
         if (profile) {
           if (profile.role === "society" && profile.status === "pending") {
             await supabase.auth.signOut();
-            setError("Your society account is pending admin approval.");
+            setError("Your account is pending admin approval. Please wait for an administrator to verify your society.");
           } else {
             if (profile.role === "admin") navigate("/admin");
             else if (profile.role === "society") navigate("/society-dashboard");
@@ -55,6 +58,7 @@ export default function AuthForm() {
     checkSession();
   }, [navigate]);
 
+  // --- GSAP Initial Load ---
   useGSAP(() => {
     const tl = gsap.timeline();
     tl.fromTo(
@@ -70,6 +74,7 @@ export default function AuthForm() {
     );
   }, { scope: containerRef });
 
+  // --- GSAP Form Toggle Animations ---
   useGSAP(() => {
     gsap.fromTo(
       ".gsap-input",
@@ -78,6 +83,7 @@ export default function AuthForm() {
     );
   }, { dependencies: [isLogin, isAdminMode], scope: formRef });
 
+  // --- GSAP Admin Mode Transition ---
   useGSAP(() => {
     if (isAdminMode) {
       gsap.to(cardRef.current, { borderColor: "rgba(220, 38, 38, 0.5)", duration: 0.5 }); 
@@ -86,13 +92,15 @@ export default function AuthForm() {
     }
   }, { dependencies: [isAdminMode] });
 
+  // --- Submit Logic ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      if (isAdminMode) {
+      // --- HARDCODED ADMIN LOGIC ---
+      if (isAdminMode || (isLogin && loginInput === "admin" && password === "admin")) {
         if (loginInput === "admin" && password === "admin") {
           localStorage.setItem("nep_admin_bypass", "true");
           navigate("/admin");
@@ -101,15 +109,24 @@ export default function AuthForm() {
           throw new Error("Access Denied: Invalid Admin Credentials.");
         }
       } 
+      // --- NORMAL USER LOGIN ---
       else if (isLogin) {
-        if (loginInput === "admin" && password === "admin") {
-          localStorage.setItem("nep_admin_bypass", "true");
-          navigate("/admin");
-          return;
+        let loginEmail = loginInput;
+        
+        // If the user typed a username instead of an email, fetch the email first
+        if (!loginInput.includes("@")) {
+          const { data } = await supabase
+            .from("profiles")
+            .select("email")
+            .eq("username", loginInput)
+            .single();
+
+          if (data) loginEmail = data.email;
+          else throw new Error("Username not found.");
         }
 
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: loginInput, 
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: loginEmail, 
           password: password,
         });
 
@@ -118,40 +135,58 @@ export default function AuthForm() {
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role, status")
-          .eq("id", data.user.id)
+          .eq("id", authData.user.id)
           .single();
 
-        if (profileError) throw profileError;
+        if (profileError) throw new Error("Failed to fetch user profile.");
 
         if (profile.role === "society" && profile.status === "pending") {
           await supabase.auth.signOut();
-          throw new Error("Your society account is still pending admin approval.");
+          throw new Error("Your society account has not been approved yet. An admin must verify your account before you can log in.");
         }
 
         if (profile.role === "society") navigate("/society-dashboard");
         else navigate("/student-dashboard");
 
       } 
+      // --- NORMAL USER SIGNUP ---
       else {
         if (password !== confirmPassword) throw new Error("Passwords do not match!");
 
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
         });
 
         if (signUpError) throw signUpError;
 
-        if (data?.user) {
-          const { error: profileError } = await supabase.from("profiles").insert([
-            {
-              id: data.user.id,
-              username: username,
-              fullname: fullname,
-              role: role,
-              status: role === "society" ? "pending" : "approved",
-            },
-          ]);
+        if (authData?.user) {
+          let finalSocietyId = null;
+
+          // If the user is a society, create the entry in the 'societies' table first
+          if (role === 'society') {
+            const { data: newSoc, error: socError } = await supabase
+              .from("societies")
+              .insert([{ name: fullname }]) 
+              .select()
+              .single();
+
+            if (socError) {
+              throw new Error("Error creating society entry: " + socError.message);
+            }
+            finalSocietyId = newSoc.id;
+          }
+
+          // Create the Profile with the linked society_id
+          const { error: profileError } = await supabase.from("profiles").insert([{
+            id: authData.user.id,
+            username: username,
+            fullname: fullname,
+            email: email,
+            role: role,
+            status: role === 'society' ? 'pending' : 'approved',
+            society_id: finalSocietyId // Links the two tables
+          }]);
 
           if (profileError) throw profileError;
 
@@ -170,9 +205,10 @@ export default function AuthForm() {
     }
   };
 
+  // --- Secret Admin Toggle Handler ---
   const toggleAdminMode = () => {
     setIsAdminMode(!isAdminMode);
-    setIsLogin(true); 
+    setIsLogin(true); // Admin mode forces login view
     setError("");
   };
 
@@ -181,9 +217,11 @@ export default function AuthForm() {
       ref={containerRef}
       className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-[#2a0845] via-[#4A0E4E] to-[#600000] overflow-hidden relative"
     >
+      {/* Background Effects */}
       <div className={`absolute top-1/4 left-1/4 w-96 h-96 rounded-full mix-blend-overlay filter blur-[128px] opacity-20 animate-pulse transition-colors duration-1000 ${isAdminMode ? 'bg-red-600' : 'bg-[#FFD700]'}`}></div>
       <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full mix-blend-overlay filter blur-[128px] opacity-30 animate-pulse transition-colors duration-1000 ${isAdminMode ? 'bg-orange-600' : 'bg-[#9333EA]'}`} style={{ animationDelay: '2s' }}></div>
 
+      {/* Secret Admin Toggle Button */}
       <button 
         onClick={toggleAdminMode}
         className={`absolute bottom-6 right-6 p-3 rounded-full transition-all duration-500 z-50 ${isAdminMode ? 'text-red-400 bg-red-900/30' : 'text-white/20 hover:text-white/60 bg-transparent'}`}
@@ -200,7 +238,7 @@ export default function AuthForm() {
         
         <div className="auth-header text-center mb-6">
           <h2 className={`text-4xl font-extrabold tracking-tight drop-shadow-md transition-colors ${isAdminMode ? 'text-red-500' : 'text-white'}`}>
-            {isAdminMode ? "System Override" : isLogin ? "Holaa" : "Konnect"}
+            {isAdminMode ? "System Override" : isLogin ? "Holaa" : "Connect"}
           </h2>
           <p className="text-gray-300 mt-2 font-medium tracking-wide">
             {isAdminMode ? "Enter admin credentials." : isLogin ? "Continue from where you left" : "Create account."}
@@ -208,13 +246,14 @@ export default function AuthForm() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm text-center font-medium backdrop-blur-sm">
+          <div className={`mb-4 p-3 border rounded-lg text-sm text-center font-medium backdrop-blur-sm ${error.includes("created!") ? "bg-green-500/20 border-green-500/50 text-green-200" : "bg-red-500/20 border-red-500/50 text-red-200"}`}>
             {error}
           </div>
         )}
 
         <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
           
+          {/* Inputs */}
           {(!isLogin && !isAdminMode) && (
             <div className="gsap-input">
               <input 
@@ -231,7 +270,7 @@ export default function AuthForm() {
           <div className="gsap-input">
             <input 
               type={isLogin || isAdminMode ? "text" : "email"} 
-              placeholder={isAdminMode ? "Admin Username" : "Email Address / Username"} 
+              placeholder={isAdminMode ? "Admin Username" : "Email Address or Username"} 
               value={isLogin || isAdminMode ? loginInput : email}
               onChange={(e) => isLogin || isAdminMode ? setLoginInput(e.target.value) : setEmail(e.target.value)}
               required 
@@ -288,13 +327,7 @@ export default function AuthForm() {
             </>
           )}
 
-          {(isLogin && !isAdminMode) && (
-             <div className="gsap-input text-right">
-               <a href="#" className="text-sm text-gray-400 hover:text-[#FFD700] transition-colors">
-                 Forgot password?
-               </a>
-             </div>
-          )}
+          
 
           <button 
             type="submit" 
@@ -309,6 +342,7 @@ export default function AuthForm() {
           </button>
         </form>
 
+        {/* Footer Toggle (Hidden in Admin Mode) */}
         {!isAdminMode && (
           <div className="mt-8 text-center gsap-input border-t border-white/10 pt-6">
             <p className="text-gray-300">
