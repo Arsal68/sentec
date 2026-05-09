@@ -1,16 +1,62 @@
-# React + Vite
+# Sentec
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![JavaScript](https://img.shields.io/badge/JavaScript-Language-yellow)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/Arsal68/sentec)
 
-Currently, two official plugins are available:
+A modern web application built with JavaScript for sentiment analysis and text processing.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**Live Demo:** [https://nedconnect.vercel.app](https://nedconnect.vercel.app)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 👥 Team: Array yar
 
-## Expanding the ESLint configuration
+This project is developed and maintained by the **Array yar** team:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Member | Role |
+|--------|------|
+| Arsal | Developer |
+| Haris | Developer |
+| Usman | Developer |
+| Shaji | Developer |
+
+---
+
+## 📋 About
+
+Sentec is a sentiment analysis and text processing application designed to help users analyze the emotional tone and sentiment of text data. Built with modern JavaScript technologies, it provides an intuitive interface for processing and understanding textual content.
+
+---
+
+## 🚀 Features
+
+- **Sentiment Analysis**: Analyze the sentiment of text input
+- **Text Processing**: Process and transform text data
+- **User-Friendly Interface**: Clean and intuitive UI for easy interaction
+- **Real-time Processing**: Get instant analysis results
+- **Web-Based**: No installation required, accessible from any browser
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: JavaScript
+- **Deployment**: Vercel
+- **Version Control**: Git & GitHub
+
+---
+
+## 📦 Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/Arsal68/sentec.git
+
+# Navigate to the project directory
+cd sentec
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
